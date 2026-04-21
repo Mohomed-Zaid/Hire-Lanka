@@ -359,6 +359,7 @@ export const AdminDashboardPage = () => {
 
   useEffect(() => {
     load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

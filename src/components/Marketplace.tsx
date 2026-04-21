@@ -736,7 +736,8 @@ export const ClientDashboard = () => {
 
   const { profile } = useContext(AuthContext);
   const [myOrders, setMyOrders] = useState<any[]>([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [_loadingOrders, setLoadingOrders] = useState(true);
+  void _loadingOrders;
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1194,8 +1195,10 @@ export const ChatSystem = () => {
   const location = useLocation();
   const [chats, setChats] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
-  const [loadingChats, setLoadingChats] = useState(true);
-  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [_loadingChats, setLoadingChats] = useState(true);
+  void _loadingChats;
+  const [_loadingMessages, setLoadingMessages] = useState(true);
+  void _loadingMessages;
   const [sending, setSending] = useState(false);
   const [forcedPartnerName, setForcedPartnerName] = useState<string>('');
 
@@ -1377,6 +1380,7 @@ export const ChatSystem = () => {
         channelRef.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id, activeChat]);
 
   const active = chats[activeChat];

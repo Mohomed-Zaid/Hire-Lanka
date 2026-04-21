@@ -29,14 +29,6 @@ import { Link, useLocation, useNavigate, useParams, useLocation as useRouterLoca
 import { AuthContext } from '../auth/AuthProvider';
 import { supabase } from '../lib/supabaseClient';
 
-type HireLankaSession = {
-  id: string;
-  email: string;
-  fullName: string;
-  role: 'client' | 'freelancer';
-  loggedInAt: number;
-};
-
 type HireLankaRequest = {
   id: string;
   category: string;
@@ -47,38 +39,6 @@ type HireLankaRequest = {
   createdAt: number;
   clientId?: string;
   clientName?: string;
-};
-
-type HireLankaGig = {
-  id: string;
-  ownerId: string;
-  ownerName: string;
-  ownerHandle: string;
-  title: string;
-  category: string;
-  description: string;
-  requirements: string;
-  packages: Record<string, { price: string; deliveryDays: string; revisions: string; desc: string }>;
-  createdAt: number;
-};
-
-type HireLankaOrder = {
-  id: string;
-  buyerId: string;
-  buyerName: string;
-  sellerId: string;
-  sellerName: string;
-  sellerHandle: string;
-  gigId: string;
-  gigTitle: string;
-  packageName: string;
-  price: number;
-  serviceFee: number;
-  total: number;
-  notes: string;
-  paymentMethod: 'card' | 'bank';
-  status: 'Placed' | 'In Progress' | 'Delivered';
-  createdAt: number;
 };
 
 // --- Shared Components ---
@@ -836,6 +796,7 @@ const SellerInvoicesTab = ({ profile, orders }: { profile: any; orders: any[] })
 
   useEffect(() => {
     fetchInvoices();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
   const handleMilestoneCountChange = (count: number) => {
@@ -2329,8 +2290,10 @@ export const CheckoutPage = () => {
   const gigTitle = state.gigTitle || 'Logo Design Service';
   const gigId = state.gigId || 'seed_gig_1';
   const sellerId = state.sellerId || 'seed_seller_1';
-  const sellerName = state.sellerName || 'Aruni Perera';
-  const sellerHandle = state.sellerHandle || 'aruni';
+  const _sellerName = state.sellerName || 'Aruni Perera';
+  void _sellerName;
+  const _sellerHandle = state.sellerHandle || 'aruni';
+  void _sellerHandle;
   const serviceFee = Math.max(250, Math.round(price * 0.05));
   const total = price + serviceFee;
 
