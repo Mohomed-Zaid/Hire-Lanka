@@ -1,46 +1,158 @@
-# Getting Started with Create React App
+# HireLanka
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+HireLanka is a freelancing marketplace built with React + Supabase.
 
-## Available Scripts
+## Tech Stack
 
-In the project directory, you can run:
+- **Frontend**: React (Create React App), TypeScript
+- **Backend**: Node/Express API (`/server`)
+- **Database/Auth/Storage/Realtimes**: Supabase
 
-### `npm start`
+## Prerequisites
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Node.js + npm
+- A Supabase project (URL + anon key)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Environment Variables
 
-### `npm test`
+### Frontend (`hire-lanka/.env`)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Create `hire-lanka/.env`:
 
-### `npm run build`
+```bash
+REACT_APP_SUPABASE_URL=your_supabase_url
+REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
+REACT_APP_API_BASE_URL=http://localhost:4000
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Backend (`hire-lanka/server/.env`)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Create `hire-lanka/server/.env`:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+PORT=4000
 
-### `npm run eject`
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+ADMIN_EMAIL=admin@hirelanka.com
+ADMIN_PASSWORD=12345678
+ADMIN_TOKEN_SECRET=replace_with_a_long_random_secret
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Supabase Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Storage
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Create a bucket named `media`
+- Recommended: set bucket to **Public** (simplifies image display)
 
-## Learn More
+Paths used by the app:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- `media/portfolio/*` (freelancer portfolio images)
+- `media/gigs/*` (gig cover images)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Tables / Columns
+
+The app expects:
+
+- `gigs.cover_image_url` (text)
+- `portfolio_items` table:
+
+```sql
+create table if not exists public.portfolio_items (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null,
+  image_url text not null,
+  created_at timestamptz not null default now()
+);
+```
+
+### RLS Policies (portfolio)
+
+```sql
+alter table public.portfolio_items enable row level security;
+
+drop policy if exists "portfolio_select_all" on public.portfolio_items;
+create policy "portfolio_select_all"
+on public.portfolio_items
+for select
+to authenticated
+using (true);
+
+drop policy if exists "portfolio_insert_own" on public.portfolio_items;
+create policy "portfolio_insert_own"
+on public.portfolio_items
+for insert
+to authenticated
+with check (owner_id = auth.uid());
+
+drop policy if exists "portfolio_delete_own" on public.portfolio_items;
+create policy "portfolio_delete_own"
+on public.portfolio_items
+for delete
+to authenticated
+using (owner_id = auth.uid());
+```
+
+## Running Locally
+
+### 1) Start the backend API
+
+From `hire-lanka/server`:
+
+```bash
+npm install
+npm start
+```
+
+API runs on:
+
+- `http://localhost:4000`
+
+### 2) Start the frontend
+
+From `hire-lanka`:
+
+```bash
+npm install
+npm start
+```
+
+App runs on:
+
+- `http://localhost:3000`
+
+## Key Routes / Features
+
+- **Gig marketplace**: `/marketplace`
+  - Displays gigs and `cover_image_url` when present
+- **Find Talent (freelancers)**: `/talent`
+  - Lists freelancers based on uploaded portfolio items and shows thumbnails
+- **Freelancer profile**: `/freelancer/:handle`
+  - Displays portfolio gallery pulled from `portfolio_items`
+- **Messages**: `/messages`
+  - Supports opening a direct thread via `?partnerId=<uuid>`
+- **Seller dashboard**: `/dashboard` (freelancer role)
+  - Upload multiple portfolio images
+- **Create gig**: `/gigs/new`
+  - Upload a gig cover image (stored in Supabase Storage, URL saved to `gigs.cover_image_url`)
+- **Admin login**: `/admin/login`
+  - Token-based auth (uses backend `/api/admin/login`)
+
+## Tests
+
+```bash
+npm test
+```
+
+## Production Build
+
+```bash
+npm run build
+```
+
+Backend
+
+cd C:\Users\user\Desktop\HireLanka\hire-lanka\server
+node index.js
